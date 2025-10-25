@@ -1,0 +1,7 @@
+# Format: name,id
+MANAGER,999
+Jujo,1
+Nohora,2
+Oscar,3
+Daniela,4
+Samuel,777

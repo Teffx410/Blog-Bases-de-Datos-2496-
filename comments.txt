@@ -1,0 +1,22 @@
+#Format: post_id,author_user_id,comment_id,content,like,authorizer_user_id(optional)
+
+AA,2,COM_001,Que hermosa foto!,true,1
+AA,3,COM_002,Te ves genial!,true,1
+AA,4,COM_003,Increíble paisaje,true,1
+
+AB,3,COM_004,Ese outfit te queda perfecto,true,1
+AB,2,COM_005,Me encanta tu estilo!,true,1
+
+BA,1,COM_006,Realmente fue una sorpresa!,true,2
+BA,4,COM_007,No podía creerlo cuando lo vi,true,2
+
+CA,1,COM_008,La felicidad se te ve en los ojos,true,3
+CA,2,COM_009,Mereces toda la felicidad del mundo,true,3
+CA,4,COM_010,Que bonito verte así,true,3
+CA,3,COM_014,Que verguenza das, false,3
+
+
+
+AA,4,COM_011,Podrías subir más fotos como esta?,true
+AB,2,COM_012,¿De dónde es ese lugar?,true
+BA,1,COM_013,¿Cuándo fue esto?,true
