@@ -303,9 +303,40 @@ def create_files_if_not_exist():
                 print(f"File {filename} created successfully")
             except Exception as e:
                 print(f"Error creating {filename}: {e}")
-
 # =============================================================================
-# 5. INTERACTIVE MAIN MENU
+# 5. POST QUERY FROM USER WITHOUT MANAGER AND ANONYMOUS
+# =============================================================================
+def linked_post_from_user(session, user_id):
+    # Verificar si el usuario es manager o anónimo
+    if user_id == 999 or user_id == 0:
+        print("Manager and anonymous are unable to use this command")
+        return []
+    
+    query = """
+    MATCH (p:Post {idu: $user_id})
+    RETURN p
+    """
+    
+    try:
+        result = session.run(query, user_id=user_id)
+        posts_list = []
+        
+        for record in result:
+            post_node = record["p"]
+            post_dict = {
+                "idp": post_node.get("idp"),
+                "idu": post_node.get("idu"), 
+                "content": post_node.get("content")
+            }
+            posts_list.append(post_dict)
+        
+        return posts_list
+        
+    except Exception as e:
+        print(f"Error executing query: {e}")
+        return []
+# =============================================================================
+# 7. INTERACTIVE MAIN MENU
 # =============================================================================
 def interactive_menu(session):
     """Main interactive menu"""
