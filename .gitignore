@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+neo4j_env/
+
+# Environment variables
+.env
+
+# Neo4j
+data/
+logs/
+.graphdb/
+.neo4j/
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# System
+.DS_Store
+
+# Large data files
+*.csv
+*.json
+*.txt
+*.xlsx
