@@ -5,9 +5,9 @@ from datetime import datetime
 
 # Connection configuration
 load_dotenv()
-uri = os.getenv("NEO4J_URI")
-user = os.getenv("NEO4J_USERNAME")
-password = os.getenv("NEO4J_PASSWORD")
+uri = "neo4j+s://189d458e.databases.neo4j.io" #os.getenv("NEO4J_URI")
+user = "neo4j" #os.getenv("NEO4J_USERNAME")
+password = "UeFXV5g_Zc8guNdabzDGNe_IlmpI7TAR3C2ZzBGptJM" #os.getenv("NEO4J_PASSWORD")
 
 try:
     driver = neo4j.GraphDatabase.driver(uri, auth=(user, password))

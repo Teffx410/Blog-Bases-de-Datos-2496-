@@ -16,9 +16,9 @@ logger.info("Loading data...")
 # Set up Neo4j connection
 load_dotenv()
 
-uri = os.getenv("NEO4J_URI")
-user = os.getenv("NEO4J_USERNAME")
-password = os.getenv("NEO4J_PASSWORD")
+uri = "neo4j+s://189d458e.databases.neo4j.io" #os.getenv("NEO4J_URI")
+user = "neo4j" #os.getenv("NEO4J_USERNAME")
+password = "UeFXV5g_Zc8guNdabzDGNe_IlmpI7TAR3C2ZzBGptJM" #os.getenv("NEO4J_PASSWORD")
 
 try:
     driver = neo4j.GraphDatabase.driver(uri, auth=(user, password))
@@ -162,57 +162,72 @@ def process_post_file(session, filename="post.txt"):
         return 0, 0
     
 def ingest_comment(session, post_id, author_user_id, comment_id, content, like, authorizer_user_id=None):
-    query = """
-    MATCH (p:Post {idp: $post_id})
-    MATCH (author_user:User {id: $author_user_id})
-    
-    WITH p, author_user
-    WHERE p IS NOT NULL AND author_user IS NOT NULL
-    
-    MERGE (c:Comment {
-        idc: $comment_id,
-        idp: $post_id,
-        content: $content,
-        datec: datetime(),
-        like: $like
-    })
-    MERGE (p)-[:HAS]->(c)
-    MERGE (author_user)-[:MAKES]->(c)
-    
-    WITH c, p, author_user
-    
-    WHERE $authorizer_user_id IS NOT NULL
-    MATCH (authorizer_user:User {id: $authorizer_user_id})
-    MERGE (authorizer_user)-[:AUTHORIZES]->(c)
-    SET c.datea = datetime()
-    
-    RETURN c, p, author_user
     """
-    
+    Versión simplificada y más confiable
+    """
     try:
-        result = session.run(query, 
-                           post_id=post_id,
-                           author_user_id=author_user_id,
-                           comment_id=comment_id,
-                           content=content,
-                           like=like,
-                           authorizer_user_id=authorizer_user_id)
+        # PRIMERO: Verificar que post y usuario existen
+        check_query = """
+        MATCH (p:Post {idp: $post_id})
+        MATCH (u:User {id: $author_user_id})
+        RETURN p, u
+        """
+        check_result = session.run(check_query, 
+                                 post_id=post_id, 
+                                 author_user_id=author_user_id)
         
-        record = result.single()
-        if record:
+        if not check_result.single():
+            print(f"Unable to create comment: Post {post_id} or User {author_user_id} doesn't exist")
+            return False
+        
+        # SEGUNDO: Crear comentario (siempre funciona si llegamos aquí)
+        create_query = """
+        MATCH (p:Post {idp: $post_id})
+        MATCH (author_user:User {id: $author_user_id})
+        CREATE (c:Comment {
+            idc: $comment_id,
+            idp: $post_id,
+            content: $content,
+            datec: datetime(),
+            like: $like
+        })
+        CREATE (p)-[:HAS]->(c)
+        CREATE (author_user)-[:MAKES]->(c)
+        RETURN c
+        """
+        
+        create_result = session.run(create_query,
+                                  post_id=post_id,
+                                  author_user_id=author_user_id,
+                                  comment_id=comment_id,
+                                  content=content,
+                                  like=like)
+        
+        if create_result.single():
+            # TERCERO: Autorizar si se proporciona authorizer
             if authorizer_user_id:
-                print(f"Comment {comment_id} creado y autorizado para post {post_id}")
+                authorize_query = """
+                MATCH (c:Comment {idc: $comment_id})
+                MATCH (authorizer:User {id: $authorizer_user_id})
+                MERGE (authorizer)-[:AUTHORIZES]->(c)
+                SET c.datea = datetime()
+                RETURN c
+                """
+                session.run(authorize_query, 
+                          comment_id=comment_id, 
+                          authorizer_user_id=authorizer_user_id)
+                print(f"Comment {comment_id} created and authorized for post {post_id}")
             else:
-                print(f"Comment {comment_id} creado (pendiente de autorización) para post {post_id}")
+                print(f"Comment {comment_id} created (authorization pending) for post {post_id}")
+            
             return True
         else:
-            print(f" Unable to  create comment {comment_id}: Post {post_id} or User {author_user_id} doesnt exists")
+            print(f"Unexpected error creating comment {comment_id}")
             return False
             
     except Exception as e:
-        print(f" Error creating comment {comment_id}: {e}")
+        print(f"Error creating comment {comment_id}: {e}")
         return False
-    
 def authorize_comment(session, comment_id, authorizer_user_id):
     
     #Authorizes an existent comment
