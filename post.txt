@@ -1,4 +1,5 @@
 #Format: post_id,author_user_id,comment_id,content,like,authorizer_user_id
+
 AA,1,Excelente Foto
 AB,1,Lindo Outfit!
 BA,2,Que sorpresa
