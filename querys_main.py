@@ -23,7 +23,7 @@ def save_to_file(filename, line):
     """Saves a new line to the corresponding file"""
     try:
         with open(filename, 'a', encoding='utf-8') as file:
-            file.write(line + '\n')  # This should create a new line
+            file.write(line + '\n')
         print(f"Data saved to {filename}")
         return True
     except Exception as e:
@@ -152,7 +152,7 @@ def insert_user_interactive(session):
         record = result.single()
         
         if record:
-            # Save to users.txt file - ensure new line
+            # Save to users.txt file
             line = f"{name},{user_id}"
             if save_to_file("users.txt", line):
                 print(f"User '{name}' (ID: {user_id}) created successfully and saved to file")
@@ -192,7 +192,7 @@ def insert_post_interactive(session):
         record = result.single()
         
         if record:
-            # Save to posts.txt file - ensure new line
+            # Save to posts.txt file
             line = f"{post_id},{user_id},{content}"
             if save_to_file("post.txt", line):
                 print(f"Post '{post_id}' created successfully for user {user_id} and saved to file")
@@ -264,7 +264,7 @@ def insert_comment_interactive(session):
         record = result.single()
         
         if record:
-            # Save to comments.txt file - ensure new line
+            # Save to comments.txt file
             if authorizer_user_id:
                 line = f"{post_id},{author_user_id},{comment_id},{content},{like_str},{authorizer_user_id}"
             else:
@@ -303,12 +303,13 @@ def create_files_if_not_exist():
                 print(f"File {filename} created successfully")
             except Exception as e:
                 print(f"Error creating {filename}: {e}")
+
 # =============================================================================
 # 5. POST QUERY FROM USER WITHOUT MANAGER AND ANONYMOUS
 # =============================================================================
 def linked_post_from_user(session, user_id):
     # Verificar si el usuario es manager o anónimo
-    if user_id == 999 or user_id == 0:
+    if str(user_id) == '999' or str(user_id) == '0':
         print("Manager and anonymous are unable to use this command")
         return []
     
@@ -335,8 +336,137 @@ def linked_post_from_user(session, user_id):
     except Exception as e:
         print(f"Error executing query: {e}")
         return []
+    
 # =============================================================================
-# 7. INTERACTIVE MAIN MENU
+# 6. COMMENTS QUERY FROM USER'S POST
+# =============================================================================
+def comments_from_user_post(session):
+    try:
+        # Step 1: Request user ID
+        user_id = input("Enter user ID: ").strip()
+        
+        if not user_id:
+            print("Error: User ID is required")
+            return []
+        
+        # Step 2: Get user's posts
+        user_posts = linked_post_from_user(session, user_id)
+        
+        if not user_posts:
+            print(f"No posts found for user {user_id}")
+            return []
+        
+        # Step 3: Show user's posts
+        print(f"\nPosts from user {user_id}:")
+        print("-" * 50)
+        for i, post in enumerate(user_posts, 1):
+            print(f"{i}. Post ID: {post['idp']}")
+            print(f"   Content: {post['content']}")
+            print()
+        
+        # Step 4: Ask which post to check
+        post_choice = input("Enter the number of the post to view comments: ").strip()
+        
+        try:
+            post_index = int(post_choice) - 1
+            if post_index < 0 or post_index >= len(user_posts):
+                print("Invalid post selection")
+                return []
+        except ValueError:
+            print("Please enter a valid number")
+            return []
+        
+        selected_post = user_posts[post_index]
+        post_id = selected_post['idp']
+        
+        # Step 5: Get comments for the selected post
+        query = """
+        MATCH (p:Post {idp: $post_id})-[:HAS]->(c:Comment)
+        OPTIONAL MATCH (author:User)-[:MAKES]->(c)
+        OPTIONAL MATCH (authorizer:User)-[:AUTHORIZES]->(c)
+        RETURN c.idc as comment_id,
+               c.content as content,
+               c.datec as creation_date,
+               c.datea as authorization_date,
+               c.like as like_status,
+               author.id as author_id,
+               authorizer.id as authorizer_id
+        ORDER BY c.datec
+        """
+        
+        result = session.run(query, post_id=post_id)
+        comments_list = []
+        
+        print(f"\nComments for post '{post_id}':")
+        print("=" * 80)
+        
+        for record in result:
+            comment_data = {
+                "comment_id": record["comment_id"],
+                "content": record["content"],
+                "creation_date": record["creation_date"],
+                "authorization_date": record["authorization_date"],
+                "like_status": bool(record["like_status"]),
+                "author_id": record["author_id"],
+                "authorizer_id": record["authorizer_id"]
+            }
+            comments_list.append(comment_data)
+            
+            # Display formatted output
+            like_text = "Me gusta" if comment_data["like_status"] else "No me gusta"
+            auth_status = "AUTHORIZED" if comment_data["authorization_date"] else "PENDING"
+            
+            print(f"Comment ID: {comment_data['comment_id']}")
+            print(f"Content: {comment_data['content']}")
+            print(f"Created: {comment_data['creation_date']}")
+            print(f"Author: {comment_data['author_id']}")
+            print(f"Status: {auth_status}")
+            
+            if comment_data["authorization_date"]:
+                print(f"Authorized: {comment_data['authorization_date']}")
+                print(f"Authorized by: {comment_data['authorizer_id']}")
+            
+            print(f"Reaction: {like_text}")
+            print("-" * 50)
+        
+        if not comments_list:
+            print("No comments found for this post")
+        
+        return comments_list
+        
+    except Exception as e:
+        print(f"Error executing query: {e}")
+        return []
+
+# =============================================================================
+# 7. VIEW USER POSTS INTERACTIVE
+# =============================================================================
+def view_user_posts_interactive(session):
+    """Interactive function to view user's posts"""
+    try:
+        user_id = input("Enter user ID to view posts: ").strip()
+        
+        if not user_id:
+            print("Error: User ID is required")
+            return
+        
+        posts = linked_post_from_user(session, user_id)
+        
+        if posts:
+            print(f"\nPosts from user {user_id}:")
+            print("=" * 60)
+            for i, post in enumerate(posts, 1):
+                print(f"{i}. Post ID: {post['idp']}")
+                print(f"   Content: {post['content']}")
+                print()
+        else:
+            print(f"No posts found for user {user_id}")
+            
+    except Exception as e:
+        print(f"Error: {e}")
+
+# =============================================================================
+# 8. INTERACTIVE MAIN MENU
 # =============================================================================
 def interactive_menu(session):
     """Main interactive menu"""
@@ -351,11 +481,13 @@ def interactive_menu(session):
         print("2. Add Post") 
         print("3. Add Comment")
         print("4. Authorize Comment")
-        print("5. View generated files")
-        print("6. Exit")
+        print("5. View User Posts")  # Nueva opción
+        print("6. View Post Comments")  # Nueva opción
+        print("7. View generated files")
+        print("8. Exit")
         print("="*50)
         
-        option = input("Select an option (1-6): ").strip()
+        option = input("Select an option (1-8): ").strip()
         
         if option == "1":
             insert_user_interactive(session)
@@ -366,6 +498,10 @@ def interactive_menu(session):
         elif option == "4":
             authorize_comment_interactive(session)
         elif option == "5":
+            view_user_posts_interactive(session)
+        elif option == "6":
+            comments_from_user_post(session)
+        elif option == "7":
             print("\n=== GENERATED FILES ===")
             files = ["users.txt", "post.txt", "comments.txt"]
             for filename in files:
@@ -377,11 +513,11 @@ def interactive_menu(session):
                     print(f"{filename}: {len(data_lines)} records")
                 else:
                     print(f"{filename}: Does not exist")
-        elif option == "6":
+        elif option == "8":
             print("Goodbye!")
             break
         else:
-            print("Invalid option. Please select 1-6")
+            print("Invalid option. Please select 1-8")
 
 # =============================================================================
 # MAIN EXECUTION
