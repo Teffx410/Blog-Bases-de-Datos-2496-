@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Consultas</h1>
+
+<h3>Consulta 1 — Posts de un usuario (no anónimo ni manager)</h3>
+<form method="POST" action="/consultas/usuario_posts">
+  <input type="text" name="user_id" placeholder="ID del usuario">
+  <button type="submit">Buscar</button>
+</form>
+
+<h3>Consulta 2 — Comentarios de un post</h3>
+<form method="POST" action="/consultas/comentarios_post">
+  <input type="text" name="post_id" placeholder="ID del post">
+  <button type="submit">Buscar</button>
+</form>
+
+{% if tipo == "usuario_posts" %}
+  <h3>Resultados de posts por usuario</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Usuario</th>
+        <th>ID Post</th>
+        <th>Contenido</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in resultados %}
+        <tr>
+          <td>{{ r.usuario or r.user or r.name or r.user_id or '—' }}</td>
+          <td>{{ r.idp or r.post_id or '—' }}</td>
+          <td>{{ r.content or r.contenido or '—' }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="3">Sin resultados.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+{% elif tipo == "comentarios_post" %}
+  <h3>Resultados de comentarios por post</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>ID Comentario</th>
+        <th>Autor</th>
+        <th>Contenido</th>
+        <th>Creación</th>
+        <th>Autorización</th>
+        <th>Autorizado por</th>
+        <th>Reacción</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in resultados %}
+        <tr>
+          <td>{{ r.idc or '—' }}</td>
+          <td>{{ r.author or r.autor or r.user_id or '—' }}</td>
+          <td>{{ r.content or r.contenido or '—' }}</td>
+          <td>{{ r.created_at or r.creation or r.fecha_creacion or '—' }}</td>
+          <td>{{ 'Sí' if (r.authorized is true or r.autorizado is true) else 'No' }}</td>
+          <td>
+            {# Muestra nombre si viene; si no, mapea 999 a MANAGER; si nada, guión #}
+            {% if r.authorized_by %}
+              {{ r.authorized_by }}
+            {% elif r.autorizado_por %}
+              {{ r.autorizado_por }}
+            {% elif r.authorized_by_id == '999' %}
+              MANAGER
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td>{{ 'Me gusta' if (r.like is true or r.megusta is true) else '—' }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="7">Sin resultados.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+{% endblock %}

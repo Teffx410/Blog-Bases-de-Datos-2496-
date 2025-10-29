@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Posts</h1>
+
+<form method="POST" action="/posts/agregar">
+    <input type="text" name="user_id" placeholder="ID del usuario" required>
+    <input type="text" name="content" placeholder="Contenido del post" required>
+    <button type="submit">Agregar</button>
+</form>
+
+<table>
+    <tr><th>ID Post</th><th>Autor</th><th>Contenido</th><th>Acciones</th></tr>
+    {% for p in posts %}
+    <tr>
+        <td>{{ p.idp }}</td>
+        <td>{{ p.author }}</td>
+        <td>{{ p.content }}</td>
+        <td>
+            <form method="POST" action="/posts/editar/{{ p.idp }}">
+                <input type="text" name="content" placeholder="Nuevo contenido">
+                <button>Editar</button>
+            </form>
+            <a href="/posts/eliminar/{{ p.idp }}"><button>Eliminar</button></a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="dashboard">
+    <h2>Bienvenido al Sistema Blog Neo4j</h2>
+    <p>Administra usuarios, publicaciones y comentarios de forma visual e interactiva.</p>
+
+    <div class="dashboard-grid">
+        <a href="{{ url_for('usuarios') }}" class="card">
+            <h3>👤 Usuarios</h3>
+            <p>Agrega, edita y elimina usuarios registrados en la red.</p>
+        </a>
+
+        <a href="{{ url_for('posts') }}" class="card">
+            <h3>📝 Posts</h3>
+            <p>Gestiona las publicaciones creadas por los usuarios.</p>
+        </a>
+
+        <a href="{{ url_for('comentarios') }}" class="card">
+            <h3>💬 Comentarios</h3>
+            <p>Revisa, autoriza y administra los comentarios de los posts.</p>
+        </a>
+
+        <a href="{{ url_for('consultas') }}" class="card">
+            <h3>🔍 Consultas</h3>
+            <p>Ejecuta consultas avanzadas sobre el grafo Neo4j.</p>
+        </a>
+    </div>
+</section>
+{% endblock %}

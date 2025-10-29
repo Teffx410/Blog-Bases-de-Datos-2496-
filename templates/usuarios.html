@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Usuarios</h1>
+
+<form method="POST" action="/usuarios/agregar">
+    <input type="text" name="name" placeholder="Nombre de usuario" required>
+    <button type="submit">Agregar</button>
+</form>
+
+<table>
+    <tr><th>ID</th><th>Nombre</th><th>Acciones</th></tr>
+    {% for u in usuarios %}
+    <tr>
+        <td>{{ u.id }}</td>
+        <td>{{ u.name }}</td>
+        <td>
+            <form method="POST" action="/usuarios/editar/{{ u.id }}">
+                <input type="text" name="name" placeholder="Nuevo nombre">
+                <button>Editar</button>
+            </form>
+            <a href="/usuarios/eliminar/{{ u.id }}"><button>Eliminar</button></a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

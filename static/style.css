@@ -1,0 +1,294 @@
+/* ====== ESTILOS BASE ====== */
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #fafafa;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+/* ====== CABECERA Y NAVEGACIÓN ====== */
+header {
+  background: #ffffff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+header h1 {
+  font-weight: 600;
+  color: #111;
+  margin: 0;
+}
+
+nav a {
+  text-decoration: none;
+  color: #0078ff;
+  margin-left: 1.2rem;
+  font-weight: 500;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+/* ====== CONTENIDO PRINCIPAL ====== */
+main {
+  padding: 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+h2 {
+  margin-bottom: 1rem;
+  color: #111;
+}
+
+h3 {
+  color: #0078ff;
+}
+
+/* ====== FORMULARIOS ====== */
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+}
+
+input, select, button {
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 0.95rem;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: #0078ff;
+}
+
+button {
+  background: #0078ff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+button:hover {
+  background: #005fcc;
+}
+
+/* ====== BOTONES DE ACCIÓN ====== */
+.btn-edit {
+  background: #ffa500;
+  color: white;
+  padding: 0.4rem 0.7rem;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.btn-edit:hover {
+  background: #e69500;
+}
+
+.btn-delete {
+  background: #ff4c4c;
+  color: white;
+  padding: 0.4rem 0.7rem;
+  border-radius: 5px;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.btn-delete:hover {
+  background: #e04141;
+}
+
+/* ====== TABLAS ====== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+th, td {
+  padding: 0.9rem;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+th {
+  background: #f8f9fa;
+  font-weight: 600;
+}
+
+tr:hover {
+  background: #f3f9ff;
+}
+
+/* ====== ALERTAS ====== */
+.flash {
+  margin: 0.8rem 0;
+  padding: 0.7rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.flash.success {
+  background: #e6ffed;
+  color: #166534;
+}
+
+.flash.danger {
+  background: #ffe4e6;
+  color: #9b1c1c;
+}
+
+.flash.info {
+  background: #e0f2fe;
+  color: #1e3a8a;
+}
+
+/* ====== SUBMENÚ DE CONSULTAS ====== */
+.submenu {
+  margin-bottom: 1rem;
+}
+
+.submenu a {
+  display: inline-block;
+  background: #0078ff;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  margin-right: 0.5rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background 0.2s ease-in-out;
+}
+
+.submenu a:hover {
+  background: #005fcc;
+}
+
+/* ====== LANDING PAGE (INDEX) ====== */
+.home {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.intro {
+  max-width: 700px;
+  margin: 0 auto 2rem;
+  color: #555;
+  line-height: 1.6;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  text-decoration: none;
+  color: #333;
+  transition: all 0.2s ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.card h3 {
+  color: #0078ff;
+  margin-bottom: 0.5rem;
+}
+
+.card p {
+  color: #555;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 600px) {
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  nav a {
+    display: inline-block;
+    margin: 0.3rem 0;
+  }
+
+  form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+  }
+}
+/* ========== DASHBOARD ========== */
+.dashboard {
+    text-align: center;
+    margin-top: 3rem;
+}
+
+.dashboard h2 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.dashboard p {
+    color: #666;
+    margin-bottom: 2rem;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem;
+}
+
+.card {
+    display: block;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    text-decoration: none;
+    color: #222;
+    transition: all 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.card h3 {
+    margin-bottom: 0.5rem;
+    color: #007bff;
+}

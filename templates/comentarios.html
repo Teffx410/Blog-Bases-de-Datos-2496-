@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Comentarios</h2>
+
+<!-- FORMULARIO: Agregar comentario manual -->
+<form method="post" action="{{ url_for('agregar_comentario') }}">
+  <input type="text" name="user_id" placeholder="ID del usuario" required>
+  <input type="text" name="post_id" placeholder="ID del post" required>
+  <input type="text" name="content" placeholder="Contenido del comentario" required>
+  <label><input type="checkbox" name="like"> Me gusta</label>
+  <button type="submit">Agregar comentario</button>
+</form>
+
+<hr>
+
+<!-- TABLA DE COMENTARIOS -->
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr>
+      <th>ID Comentario</th>
+      <th>Autor</th>
+      <th>Contenido</th>
+      <th>Creación</th>
+      <th>Autorización</th>
+      <th>Autorizado por</th>
+      <th>Reacción</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for c in comentarios %}
+      <tr>
+        <td>{{ c.idc }}</td>
+        <td>{{ c.author }}</td>
+        <td>{{ c.content }}</td>
+        <td>{{ c.created_at }}</td>
+        <td>{{ 'Sí' if c.authorized else 'No' }}</td>
+        <td>{{ c.authorized_by or '-' }}</td>
+        <td>{{ 'Me gusta' if c.like else '—' }}</td>
+        <td>
+          <!-- EDITAR -->
+          <form method="post"
+                action="{{ url_for('editar_comentario', idc=c.idc) }}"
+                style="display:inline;">
+            <input type="text" name="content" placeholder="Nuevo contenido">
+            <button type="submit">Editar</button>
+          </form>
+
+          <!-- ELIMINAR -->
+          <form method="post"
+                action="{{ url_for('eliminar_comentario', idc=c.idc) }}"
+                style="display:inline;"
+                onsubmit="return confirm('¿Eliminar este comentario?');">
+            <button type="submit">Eliminar</button>
+          </form>
+
+          <!-- AUTORIZAR -->
+<form method="post"
+      action="{{ url_for('autorizar_comentario', idc=c.idc) }}"
+      style="display:inline;">
+  <!-- Opción 1: fijo MANAGER (999) -->
+  <input type="hidden" name="authorizer_id" value="999">
+  <button type="submit">Autorizar</button>
+</form>
+
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

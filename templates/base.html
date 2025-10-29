@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Neo4j</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <header class="navbar">
+        <div class="container">
+            <h1 class="logo">Blog Neo4j</h1>
+            <nav class="menu">
+                <a href="{{ url_for('index') }}" class="{% if request.path == '/' %}active{% endif %}">Inicio</a>
+                <a href="{{ url_for('usuarios') }}" class="{% if '/usuarios' in request.path %}active{% endif %}">Usuarios</a>
+                <a href="{{ url_for('posts') }}" class="{% if '/posts' in request.path %}active{% endif %}">Posts</a>
+                <a href="{{ url_for('comentarios') }}" class="{% if '/comentarios' in request.path %}active{% endif %}">Comentarios</a>
+                <a href="{{ url_for('consultas') }}" class="{% if '/consultas' in request.path %}active{% endif %}">Consultas</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="content container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+
+    
+</body>
+</html>

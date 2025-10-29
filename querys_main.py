@@ -6,10 +6,9 @@ import uuid
 
 # Connection configuration
 load_dotenv()
-uri = "neo4j+s://189d458e.databases.neo4j.io"
-user = "neo4j"
-password = "UeFXV5g_Zc8guNdabzDGNe_IlmpI7TAR3C2ZzBGptJM"
-
+uri = "neo4j+s://189d458e.databases.neo4j.io" #os.getenv("NEO4J_URI")
+user = "neo4j" #os.getenv("NEO4J_USERNAME")
+password = "UeFXV5g_Zc8guNdabzDGNe_IlmpI7TAR3C2ZzBGptJM" #os.getenv("NEO4J_PASSWORD")
 try:
     driver = neo4j.GraphDatabase.driver(uri, auth=(user, password))
     print("Connected to Neo4j successfully!")
@@ -1015,6 +1014,129 @@ def interactive_menu(session):
             break
         else:
             print("Invalid option. Please select 1-15")  # ← ESTA LÍNEA FALTABA
+
+# ======================================================
+# FUNCIONES PARA INTEGRACIÓN CON FLASK (SIN input())
+# ======================================================
+
+# ========= USUARIOS =========
+def create_user(session, name):
+    """Crea un nodo de tipo User."""
+    query = "CREATE (u:User {id: randomUUID(), name:$name})"
+    session.run(query, name=name)
+
+def update_user(session, user_id, new_name):
+    """Actualiza el nombre de un usuario."""
+    query = "MATCH (u:User {id:$user_id}) SET u.name = $new_name"
+    session.run(query, user_id=user_id, new_name=new_name)
+
+def delete_user(session, user_id):
+    """Elimina un usuario y sus relaciones."""
+    query = "MATCH (u:User {id:$user_id}) DETACH DELETE u"
+    session.run(query, user_id=user_id)
+
+def list_users(session):
+    """Devuelve todos los usuarios."""
+    result = session.run("MATCH (u:User) RETURN u.id AS id, u.name AS name ORDER BY u.name")
+    return [dict(record) for record in result]
+
+
+# ========= POSTS =========
+def create_post(session, user_id, content):
+    """Crea un post asociado a un usuario."""
+    query = """
+    MATCH (u:User {id:$user_id})
+    CREATE (u)-[:HAS_POST]->(p:Post {idp: randomUUID(), content:$content})
+    """
+    session.run(query, user_id=user_id, content=content)
+
+def update_post_content(session, post_id, new_content):
+    """Actualiza el contenido de un post."""
+    query = "MATCH (p:Post {idp:$post_id}) SET p.content = $new_content"
+    session.run(query, post_id=post_id, new_content=new_content)
+
+def delete_post_by_id(session, post_id):
+    """Elimina un post y sus relaciones."""
+    query = "MATCH (p:Post {idp:$post_id}) DETACH DELETE p"
+    session.run(query, post_id=post_id)
+
+def list_posts(session):
+    """Devuelve todos los posts con su autor."""
+    query = """
+    MATCH (u:User)-[:HAS_POST]->(p:Post)
+    RETURN p.idp AS idp, p.content AS content, u.name AS author, u.id AS uid
+    ORDER BY p.idp
+    """
+    result = session.run(query)
+    return [dict(record) for record in result]
+
+
+# ========= COMENTARIOS =========
+def create_comment(session, user_id, post_id, content, like):
+    """Crea un comentario de un usuario sobre un post."""
+    query = """
+    MATCH (u:User {id:$user_id}), (p:Post {idp:$post_id})
+    CREATE (u)-[:MAKES]->(c:Comment {
+        idc: randomUUID(),
+        content:$content,
+        like:$like,
+        created_at: datetime()
+    })
+    CREATE (p)-[:HAS_COMMENT]->(c)
+    """
+    session.run(query, user_id=user_id, post_id=post_id, content=content, like=like)
+
+def update_comment_content(session, comment_id, new_content):
+    """Actualiza el contenido de un comentario."""
+    query = "MATCH (c:Comment {idc:$comment_id}) SET c.content = $new_content"
+    session.run(query, comment_id=comment_id, new_content=new_content)
+
+def delete_comment_by_id(session, comment_id):
+    """Elimina un comentario."""
+    query = "MATCH (c:Comment {idc:$comment_id}) DETACH DELETE c"
+    session.run(query, comment_id=comment_id)
+
+def list_comments(session):
+    """Devuelve todos los comentarios con info del autor y post."""
+    query = """
+    MATCH (u:User)-[:MAKES]->(c:Comment)-[:HAS_COMMENT]-(p:Post)
+    RETURN c.idc AS comment_id, c.content AS content, c.like AS like,
+           p.idp AS post_id, u.name AS author
+    ORDER BY c.created_at DESC
+    """
+    result = session.run(query)
+    return [dict(record) for record in result]
+
+
+# ========= CONSULTAS ESPECIALES =========
+
+def consulta_posts_usuarios_validos(session):
+    """Consulta 1: Posts hechos por usuarios distintos de ANONIMO y MANAGER."""
+    query = """
+    MATCH (u:User)-[:HAS_POST]->(p:Post)
+    WHERE NOT u.name IN ['ANONIMO', 'MANAGER']
+    RETURN u.name AS usuario, p.content AS post
+    ORDER BY usuario
+    """
+    result = session.run(query)
+    return [dict(record) for record in result]
+
+
+def consulta_comentarios_por_usuario(session):
+    """Consulta 2: Comentarios detallados de los posts de un usuario."""
+    query = """
+    MATCH (autor:User)-[:HAS_POST]->(p:Post)<-[:HAS_COMMENT]-(c:Comment)<-[:MAKES]-(comentador:User)
+    RETURN autor.name AS autor_post,
+           p.content AS post,
+           c.content AS comentario,
+           c.created_at AS fecha_creacion,
+           comentador.name AS quien_comento,
+           c.like AS megusta
+    ORDER BY fecha_creacion DESC
+    """
+    result = session.run(query)
+    return [dict(record) for record in result]
+
 
 # =============================================================================
 # MAIN EXECUTION
